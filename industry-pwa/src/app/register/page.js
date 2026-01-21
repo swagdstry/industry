@@ -1,113 +1,145 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import '../login/login.css'
+import { createClient } from '@/lib/supabase/client'   // ← создай этот файл, если ещё нет (см. ниже)
 
-export default function Register() {
+export default function RegisterPage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-
-  const [form, setForm] = useState({
-    nickname: '',
-    realName: '',
+  const [formData, setFormData] = useState({
+    username: '',
+    fullName: '',
     email: '',
     password: '',
-    password2: '',
-    promo: '',
+    confirmPassword: '',
   })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const update = (k, v) => setForm({ ...form, [k]: v })
+  const handleChange = (e) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+  }
 
-  const register = async () => {
-    if (loading) return
-
-    if (!form.nickname || !form.realName || !form.email || !form.password) {
-      return alert('Заполни все обязательные поля')
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError('Пароли не совпадают')
+      return
     }
-
-    if (form.password.length < 6) {
-      return alert('Пароль минимум 6 символов')
-    }
-
-    if (form.password !== form.password2) {
-      return alert('Пароли не совпадают')
+    
+    if (formData.password.length < 6) {
+      setError('Пароль должен быть минимум 6 символов')
+      return
     }
 
     setLoading(true)
 
-    // 1️⃣ проверяем никнейм
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('nickname', form.nickname)
-      .maybeSingle()
+    const supabase = createClient()
 
-    if (existing) {
-      setLoading(false)
-      return alert('Никнейм уже занят')
-    }
-
-    // 2️⃣ создаём пользователя
-    const { data: signUpData, error: signUpError } =
-      await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-      })
+    // 1. Регистрация в Supabase Auth
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {                    // ← кастомные метаданные пользователя
+          username: formData.username,
+          full_name: formData.fullName,
+        },
+      },
+    })
 
     if (signUpError) {
+      setError(signUpError.message) // "User already registered", "Password should be at least 6...", etc.
       setLoading(false)
-      return alert(signUpError.message)
+      return
     }
 
-    const user = signUpData.user
-    if (!user) {
-      setLoading(false)
-      return alert('Ошибка создания пользователя')
+    // Если email confirmation включён (по умолчанию в Supabase — да)
+    // Пользователь получит письмо → после подтверждения сможет логиниться
+    if (signUpData.user && !signUpData.session) {
+      alert('Письмо с подтверждением отправлено на почту! Проверьте inbox/spam.')
+      router.push('/login')
+      return
     }
 
-    // 3️⃣ создаём профиль
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: user.id,
-        nickname: form.nickname,
-        real_name: form.realName,
+    // Если confirmation выключен → сразу залогинен
+    if (signUpData.session) {
+      // Можно сразу создать запись в таблице profiles
+      await supabase.from('profiles').upsert({
+        id: signUpData.user.id,
+        username: formData.username,
+        full_name: formData.fullName,
+        updated_at: new Date().toISOString(),
       })
 
-    if (profileError) {
-      setLoading(false)
-      return alert(profileError.message)
+      router.push('/home') // или /onboarding
     }
 
-    // 🔜 промокоды подключим тут позже
-
-    router.push('/home')
+    setLoading(false)
   }
 
   return (
-    <div className="login-root">
-      <div className="login-card">
-        <h1>Регистрация</h1>
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div className="w-full max-w-md p-8">
+        <h1 className="text-3xl font-bold mb-8 text-center">Регистрация</h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <input
+            name="username"
+            placeholder="Никнейм"
+            value={formData.username}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 rounded-lg"
+            required
+          />
+          <input
+            name="fullName"
+            placeholder="Имя"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 rounded-lg"
+            required
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 rounded-lg"
+            required
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Пароль"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 rounded-lg"
+            required
+          />
+          <input
+            name="confirmPassword"
+            type="password"
+            placeholder="Повтор пароля"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="w-full p-4 bg-gray-900 rounded-lg"
+            required
+          />
 
-        <input placeholder="Никнейм" onChange={e => update('nickname', e.target.value)} />
-        <input placeholder="Имя" onChange={e => update('realName', e.target.value)} />
-        <input placeholder="Email" onChange={e => update('email', e.target.value)} />
+          {error && <p className="text-red-500 text-center">{error}</p>}
 
-        <input type="password" placeholder="Пароль" onChange={e => update('password', e.target.value)} />
-        <input type="password" placeholder="Повтор пароля" onChange={e => update('password2', e.target.value)} />
-
-        <details>
-          <summary style={{ color: '#aaa', cursor: 'pointer' }}>
-            Промокод (если есть)
-          </summary>
-          <input placeholder="Промокод" onChange={e => update('promo', e.target.value)} />
-        </details>
-
-        <button onClick={register} disabled={loading}>
-          {loading ? 'Создание...' : 'Создать аккаунт'}
-        </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full p-4 bg-white text-black rounded-lg font-semibold disabled:opacity-50"
+          >
+            {loading ? 'Создание...' : 'Создать аккаунт'}
+          </button>
+        </form>
       </div>
     </div>
   )

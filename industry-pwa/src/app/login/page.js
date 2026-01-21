@@ -1,68 +1,87 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import './login.css'
+import { createClient } from '@/lib/supabase/client'
+import styles from './login.module.css'
 
-export default function Login() {
+export default function LoginPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
-  const handleAuth = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const supabase = createClient()
+
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
-      // если юзера нет — регистрируем
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (signUpError) {
-        alert(signUpError.message)
-      } else {
-        router.push('/home')
-      }
-    } else {
-      router.push('/home')
+    if (signInError) {
+      setError(
+        signInError.message.includes('Invalid login credentials')
+          ? 'Неверный email или пароль'
+          : signInError.message || 'Ошибка при входе'
+      )
+      setLoading(false)
+      return
     }
 
-    setLoading(false)
+    // Успешный вход
+    router.push('/home')
+    router.refresh()
   }
 
   return (
-    <div className="login-root">
-      <div className="login-card">
-        <h1>industry</h1>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Вход</h1>
 
-        <input
-          placeholder="Email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className={styles.input}
+          />
 
-        <input
-          type="password"
-          placeholder="Пароль"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+          <input
+            type="password"
+            placeholder="Пароль"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            className={styles.input}
+          />
 
-        <button onClick={handleAuth} disabled={loading}>
-          {loading ? 'Загрузка…' : 'Войти'}
-        </button>
-        <p style={{ color: '#888', textAlign: 'center' }}>
-          Нет аккаунта? <a href="/register">Регистрация</a>
+          {error && <div className={styles.error}>{error}</div>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles.button}
+          >
+            {loading ? 'Входим...' : 'Войти'}
+          </button>
+        </form>
+
+        <p className={styles.linkText}>
+          Нет аккаунта?{' '}
+          <a href="/register" className={styles.link}>
+            Зарегистрироваться
+          </a>
         </p>
-
       </div>
     </div>
   )

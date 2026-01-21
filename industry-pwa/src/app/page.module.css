@@ -1,0 +1,87 @@
+.container {
+  width: 100%;
+  height: 100vh;
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;               /* убивает любые скроллбары */
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
+
+.content {
+  max-width: 90%;
+  padding: 0 20px;
+  z-index: 2;
+}
+
+.title {
+  font-size: clamp(3.5rem, 12vw, 8rem);  /* уменьшил max, чтобы не вылезало */
+  font-weight: 900;
+  letter-spacing: -0.04em;               /* чуть меньше, чтобы не обрезалось */
+  margin: 0 0 1.5rem;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #00d4ff, #7c3aed, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200%;
+  animation: gradient 10s ease infinite;
+  white-space: nowrap;                   /* не переносит на новую строку */
+  overflow: hidden;
+  text-overflow: ellipsis;               /* если всё равно вылезет — обрежет красиво */
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.slogan {
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  color: #ccc;
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  line-height: 1.6;
+}
+
+.joinButton {
+  padding: 16px 48px;
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.joinButton::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  padding: 2px;
+  background: linear-gradient(90deg, #00d4ff, #7c3aed, #a78bfa, #00d4ff);
+  background-size: 300%;
+  animation: gradient 8s linear infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.joinButton:hover {
+  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2));
+  box-shadow: 0 0 30px rgba(0,212,255,0.4);
+  transform: translateY(-2px);
+}

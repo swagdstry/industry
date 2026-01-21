@@ -5,23 +5,24 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  color: #fff;
 }
 
 .card {
   width: 100%;
   max-width: 380px;
   background: #111;
-  border-radius: 20px;
-  padding: 32px 24px;
+  border-radius: 24px;
+  padding: 40px 24px 32px;
   border: 1px solid #222;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
 
 .title {
   font-size: 28px;
   font-weight: 700;
+  color: #fff;
   text-align: center;
-  margin-bottom: 32px;
+  margin: 0 0 36px;
 }
 
 .form {
@@ -32,56 +33,62 @@
 
 .inputGroup {
   position: relative;
-  display: flex;
-  align-items: center;
 }
 
 .inputIcon {
   position: absolute;
   left: 16px;
-  width: 20px;
-  height: 20px;
-  opacity: 0.7;
-  pointer-events: none; /* чтобы не мешала клику по инпуту */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+/*  filter: brightness(0) invert(1); /* делает иконку белой, если она не чисто белая */
 }
 
 .input {
   width: 100%;
-  padding: 14px 16px 14px 48px; /* слева место под иконку 48px */
+  padding: 16px 16px 16px 52px; /* отступ слева под иконку */
   background: #1a1a1a;
   border: 1px solid #333;
-  border-radius: 12px;
+  border-radius: 14px;
   color: #fff;
   font-size: 16px;
   outline: none;
   box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .input:focus {
   border-color: #666;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
 }
 
 .input::placeholder {
-  color: #666;
-}
-
-.button {
-  margin-top: 12px;
-  padding: 14px;
-  background: #fff;
-  color: #000;
-  font-weight: 600;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.button:disabled {
-  opacity: 0.6;
+  color: #777;
 }
 
 .error {
   color: #ff4d4d;
   font-size: 14px;
   text-align: center;
+  margin: 8px 0;
+}
+
+.button {
+  margin-top: 12px;
+  padding: 16px;
+  background: #fff;
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

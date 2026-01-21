@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import styles from './register.module.css'  // ← подключи свой CSS-модуль
+import styles from './register.module.css'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -18,12 +18,51 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const handleSubmit = async (e) => {
-    // ... твоя логика регистрации с Supabase (как раньше)
-    // ...
+    e.preventDefault()
+    setError('')
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Пароли не совпадают')
+      return
+    }
+    if (formData.password.length < 6) {
+      setError('Пароль минимум 6 символов')
+      return
+    }
+
+    setLoading(true)
+
+    const supabase = createClient()
+
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          username: formData.username.trim(),
+          full_name: formData.fullName.trim(),
+        },
+      },
+    })
+
+    if (signUpError) {
+      setError(signUpError.message || 'Ошибка регистрации')
+      setLoading(false)
+      return
+    }
+
+    if (!data.session) {
+      alert('Письмо с подтверждением отправлено! Проверь почту.')
+      router.push('/login')
+    } else {
+      router.push('/home')
+    }
+
+    setLoading(false)
   }
 
   return (
@@ -32,15 +71,14 @@ export default function RegisterPage() {
         <h1 className={styles.title}>Регистрация</h1>
 
         <form onSubmit={handleSubmit} className={styles.form}>
-          
-          {/* Никнейм */}
+
           <div className={styles.inputGroup}>
-            <img 
-              src="https://cdn-icons-png.freepik.com/512/6543/6543037.png?ga=GA1.1.1203493570.1768999323" 
-              alt="User" 
-              className={styles.inputIcon} 
-              width={20} 
-              height={20} 
+            <img
+              src="https://cdn-icons-png.freepik.com/512/6543/6543037.png?ga=GA1.1.1203493570.1768999323"
+              alt="Никнейм"
+              className={styles.inputIcon}
+              width={22}
+              height={22}
             />
             <input
               name="username"
@@ -52,14 +90,13 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Имя */}
           <div className={styles.inputGroup}>
-            <img 
-              src="https://cdn-icons-png.freepik.com/512/6102/6102898.png?ga=GA1.1.1203493570.1768999323  " 
-              alt="Person" 
-              className={styles.inputIcon} 
-              width={20} 
-              height={20} 
+            <img
+              src="https://cdn-icons-png.freepik.com/512/6102/6102898.png?ga=GA1.1.1203493570.1768999323"
+              alt="Имя"
+              className={styles.inputIcon}
+              width={22}
+              height={22}
             />
             <input
               name="fullName"
@@ -71,14 +108,13 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Email */}
           <div className={styles.inputGroup}>
-            <img 
-              src="https://cdn-icons-png.freepik.com/512/14034/14034513.png?ga=GA1.1.1203493570.1768999323" 
-              alt="Email" 
-              className={styles.inputIcon} 
-              width={20} 
-              height={20} 
+            <img
+              src="https://cdn-icons-png.freepik.com/512/14034/14034513.png?ga=GA1.1.1203493570.1768999323"
+              alt="Email"
+              className={styles.inputIcon}
+              width={22}
+              height={22}
             />
             <input
               name="email"
@@ -91,14 +127,13 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Пароль */}
           <div className={styles.inputGroup}>
-            <img 
-              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png?ga=GA1.1.1203493570.1768999323" 
-              alt="Lock" 
-              className={styles.inputIcon} 
-              width={20} 
-              height={20} 
+            <img
+              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png?ga=GA1.1.1203493570.1768999323"
+              alt="Пароль"
+              className={styles.inputIcon}
+              width={22}
+              height={22}
             />
             <input
               name="password"
@@ -111,14 +146,13 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Повтор пароля */}
           <div className={styles.inputGroup}>
-            <img 
-              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png?ga=GA1.1.1203493570.1768999323" 
-              alt="Lock" 
-              className={styles.inputIcon} 
-              width={20} 
-              height={20} 
+            <img
+              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png?ga=GA1.1.1203493570.1768999323"
+              alt="Повтор пароля"
+              className={styles.inputIcon}
+              width={22}
+              height={22}
             />
             <input
               name="confirmPassword"
@@ -134,7 +168,7 @@ export default function RegisterPage() {
           {error && <p className={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? 'Создание...' : 'Создать аккаунт'}
+            {loading ? 'Создаём...' : 'Создать аккаунт'}
           </button>
         </form>
       </div>

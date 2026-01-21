@@ -14,7 +14,7 @@
   border-radius: 24px;
   padding: 40px 24px 32px;
   border: 1px solid #222;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
 
 .title {
@@ -33,6 +33,7 @@
 
 .inputGroup {
   position: relative;
+  width: 100%;
 }
 
 .inputIcon {
@@ -43,12 +44,13 @@
   width: 22px;
   height: 22px;
   pointer-events: none;
-/*  filter: brightness(0) invert(1); /* делает иконку белой, если она не чисто белая */
+  z-index: 2;
+/*  filter: brightness(0) invert(1); */
 }
 
 .input {
   width: 100%;
-  padding: 16px 16px 16px 52px; /* отступ слева под иконку */
+  padding: 16px 60px 16px 52px;     /* слева под иконку, справа под статус/ошибку */
   background: #1a1a1a;
   border: 1px solid #333;
   border-radius: 14px;
@@ -58,22 +60,61 @@
   box-sizing: border-box;
   appearance: none;
   -webkit-appearance: none;
+  transition: border-color 0.2s;
 }
 
 .input:focus {
   border-color: #666;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
 }
 
 .input::placeholder {
   color: #777;
 }
 
+.inputError {
+  border-color: #ff4d4d !important;
+}
+
+.status {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 2;
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checking {
+  color: #aaa;
+}
+
+.success {
+  color: #4caf50;
+}
+
+.errorInline {
+  color: #ff4d4d;
+}
+
 .error {
+  color: #ff4d4d;
+  font-size: 13px;
+  margin-top: 4px;
+  margin-left: 16px;
+  margin-bottom: 0;
+}
+
+.generalError {
   color: #ff4d4d;
   font-size: 14px;
   text-align: center;
-  margin: 8px 0;
+  margin: 12px 0;
 }
 
 .button {
@@ -86,6 +127,11 @@
   border: none;
   border-radius: 14px;
   cursor: pointer;
+  transition: background 0.2s;
+}
+
+.button:hover:not(:disabled) {
+  background: #f0f0f0;
 }
 
 .button:disabled {

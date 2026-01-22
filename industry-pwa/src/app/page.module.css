@@ -1,61 +1,63 @@
 .container {
   width: 100%;
   height: 100vh;
-  min-height: 100vh;
-  background: #000;
+  min-height: -webkit-fill-available;
+  background: linear-gradient(135deg, #0a0015 0%, #001528 50%, #001f33 100%);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  overflow: hidden;               /* убивает любые скроллбары */
-  position: relative;
+  overflow: hidden;
   margin: 0;
   padding: 0;
+  position: relative;
+  color: #fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .content {
-  max-width: 90%;
-  padding: 0 20px;
+  position: relative;
   z-index: 2;
+  text-align: center;
+  max-width: 90%;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .title {
-  font-size: clamp(3.5rem, 12vw, 8rem);  /* уменьшил max, чтобы не вылезало */
-  font-weight: 900;
-  letter-spacing: -0.04em;               /* чуть меньше, чтобы не обрезалось */
-  margin: 0 0 1.5rem;
-  line-height: 1.1;
+  font-size: clamp(2.8rem, 8vw, 5.2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin: 0 0 1.6rem;
   background: linear-gradient(90deg, #00d4ff, #7c3aed, #a78bfa);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
-  background-size: 200%;
-  animation: gradient 10s ease infinite;
-  white-space: nowrap;                   /* не переносит на новую строку */
-  overflow: hidden;
-  text-overflow: ellipsis;               /* если всё равно вылезет — обрежет красиво */
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientFlow 12s ease infinite;
+  white-space: normal;
 }
 
-@keyframes gradient {
+@keyframes gradientFlow {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
 .slogan {
-  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
-  color: #ccc;
-  max-width: 600px;
+  font-size: clamp(1.1rem, 3.5vw, 1.35rem);
+  color: #dddddd;
+  max-width: 580px;
   margin: 0 auto 3rem;
   line-height: 1.6;
+  opacity: 0.92;
 }
 
 .joinButton {
-  padding: 16px 48px;
+  padding: 14px 48px;
   font-size: clamp(1rem, 3vw, 1.2rem);
   font-weight: 600;
-  color: #fff;
+  color: #ffffff;
   background: transparent;
   border: none;
   border-radius: 999px;
@@ -72,16 +74,49 @@
   border-radius: 999px;
   padding: 2px;
   background: linear-gradient(90deg, #00d4ff, #7c3aed, #a78bfa, #00d4ff);
-  background-size: 300%;
-  animation: gradient 8s linear infinite;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  background-size: 300% 300%;
+  animation: borderFlow 7s linear infinite;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
 
 .joinButton:hover {
-  background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(124,58,237,0.2));
-  box-shadow: 0 0 30px rgba(0,212,255,0.4);
+  background: linear-gradient(135deg, rgba(0,212,255,0.16), rgba(124,58,237,0.16));
+  box-shadow: 0 0 35px rgba(0,212,255,0.35);
   transform: translateY(-2px);
+}
+
+@keyframes borderFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.loading {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+/* Мобильные корректировки */
+@media (max-width: 640px) {
+  .title {
+    font-size: clamp(2.4rem, 10vw, 4.2rem);
+  }
+  .slogan {
+    font-size: 1.05rem;
+    padding: 0 12px;
+  }
+  .joinButton {
+    padding: 12px 40px;
+  }
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 import styles from './login.module.css'
 
 export default function LoginPage() {
@@ -17,24 +18,48 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
+    const trimmedEmail = email.trim() // ← обязательно!
+
+    console.log('Попытка входа →', { email: trimmedEmail, passwordLength: password.length })
+
     const supabase = createClient()
 
     const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
+      email: trimmedEmail,
       password,
     })
 
     if (signInError) {
-      setError(
-        signInError.message.includes('Invalid login credentials')
-          ? 'Неверный email или пароль'
-          : signInError.message || 'Ошибка при входе'
-      )
+      console.error('Ошибка Supabase:', signInError)
+
+      let userMessage = 'Неверный email или пароль'
+      if (signInError.message.includes('Invalid login credentials')) {
+        userMessage = 'Неверный email или пароль'
+      } else if (signInError.message.includes('Email not confirmed')) {
+        userMessage = 'Почта ещё не подтверждена. Проверьте письмо'
+      } else if (signInError.message.includes('rate limit')) {
+        userMessage = 'Слишком много попыток. Подождите минуту'
+      } else {
+        userMessage = signInError.message
+      }
+
+      setError(userMessage)
+      toast.error('Не удалось войти', {
+        description: userMessage,
+        duration: 6000,
+      })
+
       setLoading(false)
       return
     }
 
-    // Успешный вход
+    // Успех
+    console.log('Успешный вход:', data.user?.email)
+    toast.success('Вход выполнен!', {
+      description: `Добро пожаловать, ${data.user?.email}`,
+      duration: 4000,
+    })
+
     router.push('/home')
     router.refresh()
   }
@@ -53,6 +78,7 @@ export default function LoginPage() {
             required
             autoComplete="email"
             className={styles.input}
+            disabled={loading}
           />
 
           <input
@@ -63,6 +89,7 @@ export default function LoginPage() {
             required
             autoComplete="current-password"
             className={styles.input}
+            disabled={loading}
           />
 
           {error && <div className={styles.error}>{error}</div>}
@@ -75,6 +102,12 @@ export default function LoginPage() {
             {loading ? 'Входим...' : 'Войти'}
           </button>
         </form>
+
+        <p className={styles.linkText}>
+          <a href="/forgot-password" className={styles.link}>
+            Забыли пароль?
+          </a>
+        </p>
 
         <p className={styles.linkText}>
           Нет аккаунта?{' '}

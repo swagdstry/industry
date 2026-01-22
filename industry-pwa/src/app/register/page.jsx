@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 import styles from './register.module.css'
 
 export default function RegisterPage() {
@@ -24,7 +25,7 @@ export default function RegisterPage() {
   const [usernameStatus, setUsernameStatus] = useState('idle') // idle | checking | available | taken | error
   const [usernameMessage, setUsernameMessage] = useState('')
 
-  // Реал-тайм проверка username
+  // Реал-тайм проверка никнейма
   useEffect(() => {
     if (formData.username.length < 3) {
       setUsernameStatus('idle')
@@ -40,7 +41,7 @@ export default function RegisterPage() {
         const { data, error } = await supabase
           .from('profiles')
           .select('username')
-          .eq('username', formData.username.trim())
+          .eq('username', formData.username.trim().toLowerCase())
           .maybeSingle()
 
         if (error) throw error
@@ -53,9 +54,9 @@ export default function RegisterPage() {
           setUsernameMessage('Свободен ✓')
         }
       } catch (err) {
-        console.error(err)
+        console.error('Ошибка проверки ника:', err.message || err)
         setUsernameStatus('error')
-        setUsernameMessage('Ошибка проверки')
+        setUsernameMessage('Не удалось проверить')
       }
     }, 600)
 
@@ -66,39 +67,24 @@ export default function RegisterPage() {
     const newErrors = {}
 
     // username
-    if (!formData.username.trim()) {
-      newErrors.username = 'Никнейм обязателен'
-    } else if (formData.username.length < 3) {
-      newErrors.username = 'Минимум 3 символа'
-    } else if (usernameStatus === 'taken') {
-      newErrors.username = 'Никнейм уже занят'
-    }
+    if (!formData.username.trim()) newErrors.username = 'Никнейм обязателен'
+    else if (formData.username.length < 3) newErrors.username = 'Минимум 3 символа'
+    else if (usernameStatus === 'taken') newErrors.username = 'Никнейм уже занят'
 
     // fullName
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Имя обязательно'
-    } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = 'Имя слишком короткое'
-    }
+    if (!formData.fullName.trim()) newErrors.fullName = 'Имя обязательно'
+    else if (formData.fullName.trim().length < 2) newErrors.fullName = 'Имя слишком короткое'
 
     // email
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email обязателен'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Некорректный email'
-    }
+    if (!formData.email.trim()) newErrors.email = 'Email обязателен'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Некорректный email'
 
     // password
-    if (!formData.password) {
-      newErrors.password = 'Пароль обязателен'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Минимум 6 символов'
-    }
+    if (!formData.password) newErrors.password = 'Пароль обязателен'
+    else if (formData.password.length < 6) newErrors.password = 'Минимум 6 символов'
 
     // confirmPassword
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Пароли не совпадают'
-    }
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Пароли не совпадают'
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -108,7 +94,6 @@ export default function RegisterPage() {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
 
-    // очищаем ошибку при вводе
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }))
     }
@@ -127,7 +112,7 @@ export default function RegisterPage() {
         password: formData.password,
         options: {
           data: {
-            username: formData.username.trim(),
+            username: formData.username.trim().toLowerCase(),
             full_name: formData.fullName.trim(),
           },
         },
@@ -135,17 +120,43 @@ export default function RegisterPage() {
 
       if (error) throw error
 
-      // Успешная регистрация
+      // Создаём профиль в таблице profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          username: formData.username.trim().toLowerCase(),
+          full_name: formData.fullName.trim(),
+        })
+
+      if (profileError) {
+        console.error('Ошибка создания профиля:', profileError)
+        toast.error('Ошибка создания профиля', {
+          description: profileError.message || 'Попробуйте позже',
+        })
+        return
+      }
+
+      // Успех
       if (!data.session) {
-        // Требуется подтверждение почты (по умолчанию в Supabase)
-        alert(`Код подтверждения отправлен на ${formData.email}\nПроверьте почту (и папку "Спам")`)
+        toast.success('Письмо отправлено!', {
+          description: `Проверьте ${formData.email} (и папку «Спам»)`,
+          duration: 8000,
+          icon: '📧',
+        })
         router.push('/login')
       } else {
-        // Если подтверждение отключено в настройках Supabase
+        toast.success('Регистрация завершена!', {
+          description: 'Добро пожаловать в Industry',
+          duration: 5000,
+        })
         router.push('/home')
       }
     } catch (error) {
-      setErrors({ general: error.message || 'Ошибка регистрации. Попробуйте позже.' })
+      toast.error('Ошибка регистрации', {
+        description: error.message || 'Попробуйте позже',
+        duration: 6000,
+      })
     } finally {
       setLoading(false)
     }
@@ -157,11 +168,10 @@ export default function RegisterPage() {
         <h1 className={styles.title}>Регистрация</h1>
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
-
           {/* Никнейм */}
           <div className={styles.inputGroup}>
             <img
-              src="https://cdn-icons-png.freepik.com/512/6543/6543037.png?ga=GA1.1.1203493570.1768999323"
+              src="https://cdn-icons-png.freepik.com/512/6543/6543037.png"
               alt="Никнейм"
               className={styles.inputIcon}
               width={22}
@@ -195,7 +205,7 @@ export default function RegisterPage() {
           {/* Имя */}
           <div className={styles.inputGroup}>
             <img
-              src="https://cdn-icons-png.freepik.com/512/6102/6102898.png?ga=GA1.1.1203493570.1768999323"
+              src="https://cdn-icons-png.freepik.com/512/6102/6102898.png"
               alt="Имя"
               className={styles.inputIcon}
               width={22}
@@ -216,7 +226,7 @@ export default function RegisterPage() {
           {/* Email */}
           <div className={styles.inputGroup}>
             <img
-              src="https://cdn-icons-png.freepik.com/512/14034/14034513.png?ga=GA1.1.1203493570.1768999323"
+              src="https://cdn-icons-png.freepik.com/512/14034/14034513.png"
               alt="Email"
               className={styles.inputIcon}
               width={22}
@@ -238,7 +248,7 @@ export default function RegisterPage() {
           {/* Пароль */}
           <div className={styles.inputGroup}>
             <img
-              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png?ga=GA1.1.1203493570.1768999323"
+              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png"
               alt="Пароль"
               className={styles.inputIcon}
               width={22}
@@ -260,7 +270,7 @@ export default function RegisterPage() {
           {/* Повтор пароля */}
           <div className={styles.inputGroup}>
             <img
-              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png?ga=GA1.1.1203493570.1768999323"
+              src="https://cdn-icons-png.freepik.com/512/10976/10976481.png"
               alt="Повтор пароля"
               className={styles.inputIcon}
               width={22}
@@ -289,6 +299,13 @@ export default function RegisterPage() {
             {loading ? 'Создаём...' : 'Создать аккаунт'}
           </button>
         </form>
+
+        <p className={styles.loginLink}>
+          Уже есть аккаунт?{' '}
+          <a href="/login" className={styles.link}>
+            Войти
+          </a>
+        </p>
       </div>
     </div>
   )

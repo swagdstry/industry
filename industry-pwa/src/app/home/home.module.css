@@ -1,0 +1,289 @@
+.container {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  font-family: system-ui, -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.welcome {
+  font-size: clamp(2.2rem, 7vw, 3.8rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 3.5vw, 1.25rem);
+  color: #a0a0a0;
+  margin-bottom: 3rem;
+  max-width: 500px;
+}
+
+.placeholder {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 600px;
+  text-align: center;
+}
+
+.placeholder p {
+  color: #888;
+  font-size: 1.1rem;
+}
+
+.loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #888;
+}
+
+/* Футер (всегда снизу) */
+.footer {
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+  height: 70px;
+  box-sizing: border-box;
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* На ПК — чуть больше отступов */
+@media (min-width: 641px) {
+  .footer {
+    padding: 12px 32px;
+    height: 80px;
+  }
+  .main {
+    padding-bottom: 100px;
+  }
+}
+
+/* На мобильных — компактнее, но всё ещё снизу */
+@media (max-width: 640px) {
+  .footer {
+    padding: 10px 16px;
+    height: 70px;
+  }
+  .main {
+    padding-bottom: 90px;
+  }
+
+  .username {
+    display: none; /* скрываем ник на узких экранах */
+  }
+
+  .iconBtn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+  }
+}
+
+/* Общие стили */
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoWrapper {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #00d4ff, #7c3aed);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+}
+
+.appName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: none;
+
+  @media (min-width: 768px) {
+    display: inline;
+  }
+}
+
+.footerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userBlock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar,
+.avatarPlaceholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+}
+
+.avatar {
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.avatarPlaceholder {
+  background: linear-gradient(135deg, #7c3aed, #00d4ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+}
+
+.username {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #e0e0e0;
+}
+
+.divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 12px;
+}
+
+.icons {
+  display: flex;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.logoutBtn {
+  width: 44px;
+  height: 44px;
+  background: #ff4d4d;           /* красный фон */
+  color: white;
+  border: none;
+  border-radius: 50%;             /* круглая форма */
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
+}
+
+.logoutBtn:hover {
+  background: #ff3333;            /* ярче при наведении */
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(255, 77, 77, 0.5);
+}
+
+.logoutBtn:active {
+  transform: scale(0.95);
+}
+
+/* Бейджи ролей */
+.roleBadge {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+/* Для премиум-звёздочки */
+.roleBadge:not(img) {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* Для звёздочки премиума */
+.roleBadge:not(img) {
+  font-size: 1.6rem;
+}
+
+/* Аватар с онлайн-точкой */
+.avatarWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.onlineDot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #00ff9d;
+  border-radius: 50%;
+  border: 2px solid #0a0a0a;
+  box-shadow: 0 0 8px rgba(0, 255, 157, 0.8);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 255, 157, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+}
+
+.roleBadgeContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.roleBadge {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}

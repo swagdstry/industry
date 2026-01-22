@@ -138,3 +138,22 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+/* Ссылка "Уже есть аккаунт? Войти" */
+.loginLink {
+  text-align: center;
+  color: #aaaaaa;
+  font-size: 14px;
+  margin-top: 24px;
+}
+
+.loginLink .link {
+  color: #ffffff;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.loginLink .link:hover {
+  color: #00d4ff;
+}
